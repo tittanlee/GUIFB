@@ -47,6 +47,7 @@ def facebook_get_user_info():
   return user_name
 
 def facebook_login(username, password):
+  chrome_intialization()
   print ("%s %s Login to Facebook...." %(current_time(), username)),
 
   sys.stdout.flush() 
@@ -362,7 +363,6 @@ def main():
   if (account_list_idx >= account_info_list_len):
     account_list_idx = 0
 
-  chrome_intialization()
   cookies = dict()
   cookies = facebook_login(username,password)
 
