@@ -22,11 +22,19 @@ class FacebookApp(Frame):
 
     self.initUI()
 
+    self.group_list = None
+    self.start_button_thread = threading.Thread(name = "start_btn_thread", target = self.thread_start_button_function)
+    self.start_button_thread.daemon = True
+
   def initUI(self):
     left_frame = Frame(self)
     self.create_left_frame_ui(left_frame)
     left_frame.pack(fill = BOTH, expand = 1, side = LEFT)
 
+    # center_frame = Frame(self)
+    # s = ttk.Separator(center_frame, orient = VERTICAL)
+    # s.grid(padx = 10)
+    # center_frame.pack(fill = BOTH, expand = 1, side = LEFT)
 
     right_frame = Frame(self)
     self.create_right_frame_ui(right_frame)
@@ -46,30 +54,43 @@ class FacebookApp(Frame):
     self.textPad.pack(fill = X)
 
  
-
   def create_right_frame_ui(self, parent_frame):
 
     self.random_sel_group = IntVar()
     Checkbutton(parent_frame, text="是否要隨機挑選群組", variable=self.random_sel_group, anchor = W).pack(side = TOP, anchor = W)
 
-    self.group_listbox = Treeview(parent_frame, columns =  ("members", "privacy"))
-    # self.group_listbox = Treeview(parent_frame)
-    self.group_listbox.pack(side = TOP)
+    group_list_frame = Frame(parent_frame)
+    group_list_frame.pack(side = TOP)
+
+    self.group_listbox = Treeview(group_list_frame, columns = ("members", "privacy"))
+    self.group_listbox.pack(side = LEFT)
 
     self.group_listbox.heading("#0", text="社團名稱", anchor = W)
     self.group_listbox.column("#0", stretch = True)
 
+    self.group_listbox.heading("members", text="社團人數", anchor = W)   
+    self.group_listbox.column("members", stretch = True)
 
-    self.group_listbox.heading("#1", text="社團人數", anchor = 'w')   
-    self.group_listbox.column("#1", stretch = True)
+    self.group_listbox.heading("privacy", text="社團隱私", anchor = W)   
+    self.group_listbox.column("privacy", stretch = True)
 
-    self.group_listbox.heading("#2", text="社團隱私", anchor = 'w')   
-    self.group_listbox.column("#2", stretch = True)
+    ysb = ttk.Scrollbar(group_list_frame, orient=VERTICAL,   command = self.group_listbox.yview)
+    self.group_listbox['yscroll'] = ysb.set
 
-    for digit in range(20):
-      members = digit * 20
-      attrs   = "open"
-      self.group_listbox.insert("" , "end",    text=digit, values=(members, attrs))
+    xsb = ttk.Scrollbar(group_list_frame, orient=HORIZONTAL, command = self.group_listbox.xview)
+    self.group_listbox['xscroll'] = xsb.set
+
+    # add tree and scrollbars to frame
+    self.group_listbox.grid(row=0, column=0, sticky=NSEW)
+    ysb.grid(row=0, column=1, sticky=NS)
+    xsb.grid(row=1, column=0, sticky=EW)
+         
+
+
+    # for digit in range(120):
+    #   members = digit * 20
+    #   attrs   = "open"
+    #   self.group_listbox.insert("" , "end", text=digit, values=('123', members, attrs))
 
   def create_fbapp_login_frame(self, parnet_frame):
     Label(parnet_frame, text="電子郵件或電話 : ").grid(row= 0, sticky=E)
@@ -153,18 +174,29 @@ class FacebookApp(Frame):
     #   return
     
 
-
-    # self.th = threading.Thread(target = self.facebook_auto)
-    # self.th.start()
+    self.start_button_thread.start()
+    # self.start_button_thread.join()
   
+    
   def application_quit(self):
     self.parent.destroy()
 
-  def facebook_auto(self):
+  def thread_start_button_function(self):
     username = self.UserName.get()
     password = self.PassWord.get()
-    fb.facebook_login(username,password)
-    fb.facebook_collect_groups_id(200)
+    if fb.facebook_login(username,password) == "failed" :
+      return
+
+    self.group_list = fb.facebook_collect_groups_id(200)
+    self.insert_group_info(self.group_list)
+
+  def insert_group_info(self, group_list):
+    # self.group_listbox.insert("" , "end", text=digit, values=(members, attrs))
+    for group_info in group_list:
+      g_name = group_info['g_name']
+      g_id   = group_info['g_id']
+      self.group_listbox.insert("", "end", text = g_name)
+
 
 root = Tk()
 # root.geometry("250x150+300+300")

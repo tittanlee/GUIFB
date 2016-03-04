@@ -63,7 +63,7 @@ def facebook_login(username, password):
   if "Forgot password?" in html_source or "忘記密碼？" in html_source:
     print ("%s Incorrect Username or Password" %(current_time()))
     driver.quit()
-    exit()
+    return "failed"
   else:
     print ("%s %s Login to Facebook success" %(current_time(), username))
   return driver.get_cookies()
@@ -122,7 +122,7 @@ def facebook_collect_groups_id(max_group_count = 200):
     group_name = group.text
     group_link = group.get_attribute('href') 
     group_id   = group.get_attribute('data-hovercard').split('=')[1]
-    GROUPS_ID_LIST.append({group_id:group_name})
+    GROUPS_ID_LIST.append({'g_id':group_id, 'g_name':group_name})
     line = group_id + '=' + group_name
     write_line_to_file(GROUPS_FLIE_NAME, line) 
   
