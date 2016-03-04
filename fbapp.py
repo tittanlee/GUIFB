@@ -15,6 +15,11 @@ class FacebookApp(Frame):
     self.parent = parent
     self.parent.title("Facebook 自動行銷軟體")
     self.pack(fill=BOTH, expand=1)
+
+    self.status_bar = StatusBar(self)
+    self.status_bar.set("Status:")
+    self.status_bar.pack(fill = X, side = BOTTOM)
+
     self.initUI()
 
   def initUI(self):
@@ -26,6 +31,7 @@ class FacebookApp(Frame):
     right_frame = Frame(self)
     self.create_right_frame_ui(right_frame)
     right_frame.pack(fill = BOTH, expand = 1, side = LEFT)
+
  
   def create_left_frame_ui(self, parent_frame):
     login_frame = Frame(parent_frame)
@@ -39,16 +45,31 @@ class FacebookApp(Frame):
     self.textPad = ScrolledText(parent_frame, pady = 30, width = 70, height = 10, bg = "gray", bd = 3)
     self.textPad.pack(fill = X)
 
-    self.status_bar = StatusBar(parent_frame)
-    self.status_bar.pack(side=BOTTOM, fill=X)
  
 
   def create_right_frame_ui(self, parent_frame):
-    listbox = Listbox(parent_frame, width = 30, height = 40, bd = 3)
-    listbox.pack()
-    listbox.insert(END, "a list entry")
-    for item in ["one", "two", "three", "four"]:
-        listbox.insert(END, item)
+
+    self.random_sel_group = IntVar()
+    Checkbutton(parent_frame, text="是否要隨機挑選群組", variable=self.random_sel_group, anchor = W).pack(side = TOP, anchor = W)
+
+    self.group_listbox = Treeview(parent_frame, columns =  ("members", "privacy"))
+    # self.group_listbox = Treeview(parent_frame)
+    self.group_listbox.pack(side = TOP)
+
+    self.group_listbox.heading("#0", text="社團名稱", anchor = W)
+    self.group_listbox.column("#0", stretch = True)
+
+
+    self.group_listbox.heading("#1", text="社團人數", anchor = 'w')   
+    self.group_listbox.column("#1", stretch = True)
+
+    self.group_listbox.heading("#2", text="社團隱私", anchor = 'w')   
+    self.group_listbox.column("#2", stretch = True)
+
+    for digit in range(20):
+      members = digit * 20
+      attrs   = "open"
+      self.group_listbox.insert("" , "end",    text=digit, values=(members, attrs))
 
   def create_fbapp_login_frame(self, parnet_frame):
     Label(parnet_frame, text="電子郵件或電話 : ").grid(row= 0, sticky=E)
@@ -97,7 +118,7 @@ class FacebookApp(Frame):
     f4.pack(fill = X)
 
     f5 = Frame(parnet_frame)
-    self.browse_button = Button(f5, text="開啟文案目錄", command=self.browse_file_directory, width=10)
+    self.browse_button = Button(f5, text="指定文案目錄", command=self.browse_file_directory, width=10, bd = 5)
     self.browse_button.pack(side = LEFT)
     self.dir_name = StringVar()
     self.browse_dir_name = Entry(f5, width = 40, bd = 3 , textvariable = self.dir_name)
@@ -147,6 +168,6 @@ class FacebookApp(Frame):
 
 root = Tk()
 # root.geometry("250x150+300+300")
-root.geometry("800x500")
+# root.geometry("800x500")
 app = FacebookApp(root)
 root.mainloop()
